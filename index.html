@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dice Math Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #e0f7fa, #a5d6a7);
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      margin-top: 30px;
+      font-size: 1.5em;
+    }
+
+    .dice-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .dice-container img {
+      width: 20vw;
+      max-width: 80px;
+      height: auto;
+    }
+
+    .choices {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .choices button {
+      font-size: 1.2em;
+      padding: 12px 24px;
+      background-color: #00796b;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .choices button:hover {
+      background-color: #004d40;
+    }
+
+    #message {
+      font-size: 1.4em;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #37474f;
+    }
+
+    .sticker {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .sticker img {
+      width: 18vw;
+      max-width: 80px;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+    }
+
+    @media (max-width: 600px) {
+      .choices button {
+        font-size: 1em;
+        padding: 10px 20px;
+      }
+
+      #message {
+        font-size: 1.2em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎲 Dice Math Game</h1>
+  <div class="dice-container">
+    <img id="dice1" src="" alt="Dice 1">
+    <img id="dice2" src="" alt="Dice 2">
+    <img id="dice3" src="" alt="Dice 3">
+  </div>
+
+  <div class="choices" id="choices"></div>
+  <div id="message"></div>
+
+  <h2>🎁 Your Sticker Collection</h2>
+  <div class="sticker" id="stickerCollection"></div>
+
+  <script>
+    const stickerImages = [
+      "tiger.png", "basilisk.png", "cheetah.png", "cow.png",
+      "deathstalkerscorpion.png", "emperorscorpion.png", "giraffe.png", "godzilla.png",
+      "godzilla_fire.png", "godzilla_fireflyingspikes.png", "hornet.png", "jaguar.png",
+      "kingcobra.png", "lion.png", "ocelot.png", "penguin.png",
+      "peregrinefalcon.png", "python.png", "sabretoothtiger.png", "tarantula.png",
+      "velociraptor_pig.png", "woollymammoth.png", "camel.png", "falcon.png", "kangaroo.png", "parrot.png", "butterfly.png", "blackmamba.png", "hawk.png"
+    ];
+
+    let stickersCollected = [];
+
+    function rollDice() {
+      return Math.floor(Math.random() * 6) + 1;
+    }
+
+    function getRandomChoices(correct) {
+      const choices = new Set([correct]);
+      while (choices.size < 6) {
+        choices.add(correct + Math.floor(Math.random() * 11) - 5);
+      }
+      return Array.from(choices).sort(() => Math.random() - 0.5);
+    }
+
+    function updateStickers() {
+      const collection = document.getElementById("stickerCollection");
+      collection.innerHTML = "";
+      stickersCollected.forEach(sticker => {
+        const img = document.createElement("img");
+        img.src = `images/${sticker}`;
+        collection.appendChild(img);
+      });
+    }
+
+    function nextRound() {
+      const d1 = rollDice();
+      const d2 = rollDice();
+      const d3 = rollDice();
+      const correctSum = d1 + d2 + d3;
+
+      document.getElementById("dice1").src = `images/dice${d1}.png`;
+      document.getElementById("dice2").src = `images/dice${d2}.png`;
+      document.getElementById("dice3").src = `images/dice${d3}.png`;
+
+      const choices = getRandomChoices(correctSum);
+      const choicesContainer = document.getElementById("choices");
+      const message = document.getElementById("message");
+      message.textContent = "";
+
+      choicesContainer.innerHTML = "";
+      choices.forEach(choice => {
+        const button = document.createElement("button");
+        button.textContent = choice;
+        button.onclick = () => {
+          if (choice === correctSum) {
+            message.textContent = "✅ Correct! You earned a sticker!";
+            const sticker = stickerImages.splice(Math.floor(Math.random() * stickerImages.length), 1)[0];
+            stickersCollected.push(sticker);
+            updateStickers();
+            if (stickersCollected.length >= 10) {
+              message.textContent = "🎉 You collected all 10 stickers! You win!";
+              choicesContainer.innerHTML = "";
+              return;
+            }
+          } else {
+            message.textContent = `❌ Wrong! The correct answer was ${correctSum}.`;
+          }
+          setTimeout(nextRound, 2000);
+        };
+        choicesContainer.appendChild(button);
+      });
+    }
+
+    nextRound();
+  </script>
+</body>
+</html>
